@@ -46,10 +46,6 @@ Rectangle {
   }
 
   AppGridView {
-    anchors {
-      fill: parent
-      topMargin: 18
-      bottomMargin: 18
-    }
+    anchors.fill: parent
   }
 }
