@@ -203,6 +203,7 @@ CustomTitleBar {
       font.pixelSize: 14
       text: "Productivity - Safe App Launcher"
       color: "#f1f1f1"
+      horizontalAlignment: TextInput.AlignHCenter
     }
   }
 }

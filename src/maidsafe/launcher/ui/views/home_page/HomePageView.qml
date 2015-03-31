@@ -17,15 +17,39 @@
     use of the MaidSafe Software.                                                                 */
 
 import QtQuick 2.4
+import QtQuick.Dialogs 1.2
+import QtQuick.Controls 1.3
 
-Text {
-  id: customText
-  objectName: "customText"
+import SAFEAppLauncher.HomePageController 1.0
 
-  color: globalBrushes.textDefault
-  font {
-    pixelSize: globalProperties.customTextPixelSize
-    family: globalFontFamily.name
+import "../../custom_components"
+
+Rectangle {
+  id: appGridView
+
+  color: "#ddffffff"
+
+  Timer {
+    id: queuedConnectionTimer
+    interval: 0
   }
-  verticalAlignment: TextInput.AlignVCenter
+
+  FileDialog {
+    id: fileDialog
+
+    title: qsTr("Choose an App to add to Launcher")
+    onAccepted: homePageController_.addAppRequested(fileUrl)
+  }
+
+  ExclusiveGroup {
+    id: exclusiveGroup
+  }
+
+  AppGridView {
+    anchors {
+      fill: parent
+      topMargin: 18
+      bottomMargin: 18
+    }
+  }
 }

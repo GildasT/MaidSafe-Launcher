@@ -86,6 +86,7 @@ Item {
     anchors.horizontalCenter: parent.horizontalCenter
     font.pixelSize: customProperties.errorTextPixelSize
     Behavior on opacity { NumberAnimation { duration: 700 } }
+    horizontalAlignment: TextInput.AlignHCenter
   }
 
   Item {

@@ -19,6 +19,7 @@
 #include "maidsafe/launcher/ui/controllers/main_controller.h"
 
 #include "maidsafe/launcher/ui/controllers/account_handler_controller.h"
+#include "maidsafe/launcher/ui/controllers/home_page_controller.h"
 #include "maidsafe/launcher/ui/helpers/main_window.h"
 #include "maidsafe/launcher/ui/models/api_model.h"
 
@@ -41,6 +42,7 @@ void MainController::EventLoopStarted() {
   main_window_.reset(new MainWindow);
   api_model_ = new APIModel{this};
   account_handler_controller_ = new AccountHandlerController{*main_window_, this};
+  home_page_controller_ = new HomePageController{*main_window_, this};
 
   RegisterQtMetaTypes();
   RegisterQmlTypes();
@@ -67,6 +69,7 @@ void MainController::SetCurrentView(const MainViews new_current_view) {
 void MainController::LoginCompleted(Launcher* launcherPtr) {
   std::unique_ptr<Launcher> launcher{launcherPtr};
   static_cast<void>(launcher);
+  emit InvokeHomePageController();
   SetCurrentView(HomePage);
 }
 
@@ -86,10 +89,13 @@ void MainController::UnhandledException() {
 void MainController::RegisterQmlTypes() const {
   qmlRegisterUncreatableType<MainController>(
       "SAFEAppLauncher.MainController", 1, 0, "MainController",
-      "Error!! Attempting to access uncreatable type - MainController");
+      "Error!! Attempting to instantiate uncreatable type - MainController");
   qmlRegisterUncreatableType<AccountHandlerController>(
       "SAFEAppLauncher.AccountHandler", 1, 0, "AccountHandlerController",
-      "Error!! Attempting to access uncreatable type - AccountHandlerController");
+      "Error!! Attempting to instantiate uncreatable type - AccountHandlerController");
+  qmlRegisterUncreatableType<HomePageController>(
+      "SAFEAppLauncher.HomePageController", 1, 0, "HomePageController",
+      "Error!! Attempting to instantiate uncreatable type - HomePageController");
 }
 
 void MainController::RegisterQtMetaTypes() const {}
@@ -98,6 +104,9 @@ void MainController::SetupConnections() const {
   Q_ASSERT_X(connect(this, SIGNAL(InvokeAccountHandlerController()), account_handler_controller_,
                      SLOT(Invoke()), Qt::UniqueConnection),
              "Connection Failure", "Account Handler Controller must implement slot void Invoke()");
+  Q_ASSERT_X(connect(this, SIGNAL(InvokeHomePageController()), home_page_controller_,
+                     SLOT(Invoke()), Qt::UniqueConnection),
+             "Connection Failure", "Home Page Controller must implement slot void Invoke()");
   Q_ASSERT_X(connect(account_handler_controller_, SIGNAL(LoginCompleted(Launcher*)), this, // NOLINT - Spandan
                      SLOT(LoginCompleted(Launcher*)), Qt::UniqueConnection), // NOLINT - Spandan
              "Connection Failure",
@@ -112,6 +121,7 @@ void MainController::SetContexProperties() {
   root_context->setContextProperty("mainController_", this);
   root_context->setContextProperty("mainWindow_", main_window_.get());
   root_context->setContextProperty("accountHandlerController_", account_handler_controller_);
+  root_context->setContextProperty("homePageController_", home_page_controller_);
 }
 
 }  // namespace ui

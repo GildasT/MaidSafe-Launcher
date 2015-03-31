@@ -97,7 +97,6 @@ Rectangle {
       leftMargin: 10
     }
     horizontalAlignment: Text.AlignHCenter
-    verticalAlignment: Text.AlignVCenter
     color: globalBrushes.textGrey
   }
 
@@ -113,7 +112,6 @@ Rectangle {
     }
 
     horizontalAlignment: Text.AlignHCenter
-    verticalAlignment: Text.AlignVCenter
 
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     color: globalBrushes.textGrey

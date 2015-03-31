@@ -35,9 +35,9 @@ Item {
   property bool resizeable: true
   onResizeableChanged: {
     if (resizeable) {
-      mainWindow_.minimumWidth = 640
+      mainWindow_.minimumWidth = 320
       mainWindow_.maximumWidth = Screen.desktopAvailableWidth
-      mainWindow_.minimumHeight = 480
+      mainWindow_.minimumHeight = 240
       mainWindow_.maximumHeight = Screen.desktopAvailableHeight
     } else {
       mainWindow_.minimumWidth = width
@@ -46,8 +46,6 @@ Item {
       mainWindow_.maximumHeight = height + correctionFactor
     }
   }
-
-//  minimumWidth:
 
   FontLoader       { id: globalFontFamily; name      : "OpenSans"         }
   GlobalBrushes    { id: globalBrushes;    objectName: "globalBrushes"    }
@@ -63,7 +61,7 @@ Item {
     target: mainController_
     onCurrentViewChanged: {
       if (mainController_.currentView === MainController.HomePage) {
-        // hide buttons/logo and launch the rocket
+        // fill the rocket in white and launch
         accountHandlerLoader.item.showSuccess();
       }
     }
@@ -76,29 +74,41 @@ Item {
     height: parent.height
     source: "account_handling/AccountHandlerView.qml"
     focus: true
-    onLoaded: mainWindowItem.resizeable = false
+    onLoaded: {
+      mainWindowItem.resizeable = false
+    }
+  }
+
+  Loader {
+    id: homePageLoader
+    visible: false
+
+    y: customTitleBarLoader.item.titleBarHeight
+    width: parent.width
+    height: parent.height - customTitleBarLoader.item.titleBarHeight
+    onLoaded: {
+      y = parent.height
+      visible = true
+      rocketLaunchAnimation.start()
+      mainWindowItem.resizeable = true
+    }
   }
 
   Connections {
     target: accountHandlerLoader.item
     onShowSuccessFinished: {
-      homePage.y = mainWindow_.height
-      homePage.visible = true
-      rocketLaunchAnimation.start()
-      mainWindowItem.resizeable = true
+      homePageLoader.source = "home_page/HomePageView.qml"
     }
   }
   ParallelAnimation {
     id: rocketLaunchAnimation
     NumberAnimation {
-      target: accountHandlerLoader.item; property: "y"
-      to: -mainWindow_.height
+      target: accountHandlerLoader; property: "y"; to: -accountHandlerLoader.height
       duration: 800; easing.type: Easing.Bezier
       easing.bezierCurve: globalProperties.animationColapseEasingCurve
     }
     NumberAnimation {
-      target: homePage; property: "y"
-      to: customTitleBarLoader.item.titleBarHeight
+      target: homePageLoader; property: "y"; to: customTitleBarLoader.item.titleBarHeight
       duration: 800; easing.type: Easing.Bezier
       easing.bezierCurve: globalProperties.animationColapseEasingCurve
     }
@@ -106,15 +116,6 @@ Item {
       customTitleBarLoader.item.showHomePageControls()
       accountHandlerLoader.source = ""
     }
-  }
-
-  Rectangle {
-    id: homePage
-    visible: false
-    y: customTitleBarLoader.item.titleBarHeight
-    width: parent.width
-    height: parent.height - customTitleBarLoader.item.titleBarHeight
-    color: "#aacfcfcf"
   }
 
   Loader {
