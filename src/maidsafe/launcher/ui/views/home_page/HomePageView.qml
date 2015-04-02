@@ -29,11 +29,6 @@ Rectangle {
 
   color: "#ddffffff"
 
-  Timer {
-    id: queuedConnectionTimer
-    interval: 0
-  }
-
   FileDialog {
     id: fileDialog
 
@@ -41,11 +36,15 @@ Rectangle {
     onAccepted: homePageController_.addAppRequested(fileUrl)
   }
 
-  ExclusiveGroup {
-    id: exclusiveGroup
-  }
+  ScrollView {
+    id: scrollView
 
-  AppGridView {
     anchors.fill: parent
+    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+
+    ApplicationGridView {
+      id: applicationGridView
+      width: appGridView.width
+    }
   }
 }

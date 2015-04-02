@@ -103,6 +103,7 @@ class AppCollection : public QAbstractListModel {
 
   using ModelRoleContainer_t = QHash<int, QByteArray>;
 
+public:
   enum {
     DataRole = Qt::UserRole + 1,
     NameRole,
@@ -113,7 +114,6 @@ class AppCollection : public QAbstractListModel {
     Prop3Role,
   };
 
- public:
   explicit AppCollection(QObject* parent = nullptr);
 
   ModelRoleContainer_t roleNames() const override;

@@ -16,6 +16,8 @@
     See the Licences for the specific language governing permissions and limitations relating to
     use of the MaidSafe Software.                                                                 */
 
+#include <QSortFilterProxyModel>
+
 #include "maidsafe/launcher/ui/controllers/home_page_controller.h"
 #include "maidsafe/launcher/ui/models/app_collection.h"
 
@@ -28,13 +30,21 @@ namespace ui {
 HomePageController::HomePageController(MainWindow& main_window, QObject* parent)
     : QObject{parent},
       main_window_{main_window},
-      app_collection_{new AppCollection{this}} {
+      app_collection_{new AppCollection{this}},
+      app_collection_filter_{new QSortFilterProxyModel{this}} {
+  app_collection_filter_->setSourceModel(app_collection_);
+  app_collection_filter_->setFilterCaseSensitivity(Qt::CaseInsensitive);
+  app_collection_filter_->setFilterRole(AppCollection::NameRole);
 }
 
 HomePageController::~HomePageController() = default;
 
 QObject* HomePageController::homePageModel() const {
   return app_collection_;
+}
+
+QObject* HomePageController::homePageFilterModel() const {
+  return app_collection_filter_;
 }
 
 HomePageController::HomePageViews HomePageController::currentView() const {

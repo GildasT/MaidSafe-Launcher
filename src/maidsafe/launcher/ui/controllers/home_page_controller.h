@@ -22,6 +22,8 @@
 #include "maidsafe/launcher/ui/helpers/qt_push_headers.h"
 #include "maidsafe/launcher/ui/helpers/qt_pop_headers.h"
 
+class QSortFilterProxyModel;
+
 namespace maidsafe {
 
 namespace launcher {
@@ -35,6 +37,7 @@ class HomePageController : public QObject {
   Q_OBJECT
 
   Q_PROPERTY(QObject* homePageModel READ homePageModel CONSTANT FINAL)
+  Q_PROPERTY(QObject* homePageFilterModel READ homePageFilterModel CONSTANT FINAL)
   Q_PROPERTY(HomePageViews currentView READ currentView NOTIFY currentViewChanged FINAL)
 
  public:
@@ -50,6 +53,7 @@ class HomePageController : public QObject {
   HomePageController& operator=(const HomePageController&) = delete;
 
   QObject* homePageModel() const;
+  QObject* homePageFilterModel() const;
 
   HomePageViews currentView() const;
   void SetCurrentView(const HomePageViews new_current_view);
@@ -66,6 +70,7 @@ class HomePageController : public QObject {
  private:
   MainWindow& main_window_;
   AppCollection* app_collection_{nullptr};
+  QSortFilterProxyModel* app_collection_filter_{nullptr};
 
   HomePageViews current_view_{HomePageView};
 };
