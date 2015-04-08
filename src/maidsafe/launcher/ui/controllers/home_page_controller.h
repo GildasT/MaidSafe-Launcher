@@ -32,12 +32,14 @@ namespace ui {
 
 class MainWindow;
 class AppCollection;
+class GroupAppCollection;
 
 class HomePageController : public QObject {
   Q_OBJECT
 
   Q_PROPERTY(QObject* homePageModel READ homePageModel CONSTANT FINAL)
   Q_PROPERTY(QObject* homePageFilterModel READ homePageFilterModel CONSTANT FINAL)
+  Q_PROPERTY(QObject* homePageTreeModel READ homePageTreeModel CONSTANT FINAL)
   Q_PROPERTY(HomePageViews currentView READ currentView NOTIFY currentViewChanged FINAL)
 
  public:
@@ -54,6 +56,7 @@ class HomePageController : public QObject {
 
   QObject* homePageModel() const;
   QObject* homePageFilterModel() const;
+  QObject* homePageTreeModel() const;
 
   HomePageViews currentView() const;
   void SetCurrentView(const HomePageViews new_current_view);
@@ -71,6 +74,7 @@ class HomePageController : public QObject {
   MainWindow& main_window_;
   AppCollection* app_collection_{nullptr};
   QSortFilterProxyModel* app_collection_filter_{nullptr};
+  GroupAppCollection* app_tree_collection_{nullptr};
 
   HomePageViews current_view_{HomePageView};
 };

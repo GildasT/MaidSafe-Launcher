@@ -99,21 +99,21 @@ Item {
         CustomText {
           height: 60
           width: parent.width
-          text: detailsBox.item ? detailsBox.item.modelData.name : " "
+          text: detailsBox.item ? detailsBox.item.dataModel.name : " "
           color: detailsBox.detailsTextColor
           font.pixelSize: 25
           elide: Text.ElideMiddle
         }
         CustomText {
           width: parent.width
-          text: detailsBox.item ? detailsBox.item.modelData.prop0 : " "
+          text: qsTr("Last accessed: ") + (detailsBox.item ? detailsBox.item.dataModel.lastAccess : " ")
           color: detailsBox.detailsTextColor
           font.pixelSize: 16
           elide: Text.ElideMiddle
         }
         CustomText {
           width: parent.width
-          text: detailsBox.item ? detailsBox.item.modelData.prop1 : " "
+          text: qsTr("Location: ") + (detailsBox.item ? detailsBox.item.dataModel.path : " ")
           color: detailsBox.detailsTextColor
           font.pixelSize: 16
           elide: Text.ElideMiddle
@@ -121,7 +121,7 @@ Item {
         CustomText {
           height: 60
           width: parent.width
-          text: detailsBox.item ? detailsBox.item.modelData.prop2 : " "
+          text: qsTr("Access to SAFEDrive: ") + (detailsBox.item ? detailsBox.item.dataModel.driveAccess : " ")
           color: detailsBox.detailsTextColor
           font.pixelSize: 16
           elide: Text.ElideMiddle

@@ -71,12 +71,14 @@ Item {
     id: accountHandlerLoader
 
     width: parent.width
-    height: parent.height
-    source: "account_handling/AccountHandlerView.qml"
+    height: parent.height - y
+    source: "home_page/HomePageView.qml" // "account_handling/AccountHandlerView.qml"
     focus: true
     onLoaded: {
-      mainWindowItem.resizeable = false
+//      mainWindowItem.resizeable = false
+      customTitleBarLoader.item.showHomePageControls()
     }
+    y: customTitleBarLoader.item.titleBarHeight
   }
 
   Loader {
@@ -85,7 +87,7 @@ Item {
 
     y: customTitleBarLoader.item.titleBarHeight
     width: parent.width
-    height: parent.height - customTitleBarLoader.item.titleBarHeight
+    height: parent.height - y
     onLoaded: {
       y = parent.height
       visible = true

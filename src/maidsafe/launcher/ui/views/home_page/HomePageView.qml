@@ -24,10 +24,8 @@ import SAFEAppLauncher.HomePageController 1.0
 
 import "../../custom_components"
 
-Rectangle {
+Item {
   id: appGridView
-
-  color: "#ddffffff"
 
   FileDialog {
     id: fileDialog
@@ -36,15 +34,40 @@ Rectangle {
     onAccepted: homePageController_.addAppRequested(fileUrl)
   }
 
-  ScrollView {
-    id: scrollView
+  ApplicationGridView {
+    id: rootGridView
+    width: parent.width
+    height: parent.height
+    firstItemComponent: addAppComponent
+  }
 
-    anchors.fill: parent
-    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+  ApplicationGridView {
+    id: childGridView
+    visible: false
+    width: parent.width
+    height: parent.height
+  }
 
-    ApplicationGridView {
-      id: applicationGridView
-      width: appGridView.width
+  Component {
+    id: addAppComponent
+
+    MouseArea {
+      id: addAppMouseArea
+
+      hoverEnabled: true
+      onClicked: fileDialog.open()
+
+      Image {
+        anchors.centerIn: parent
+        source: addAppMouseArea.pressed ?
+                  "/resources/images/home_page/add_button_pressed.png"
+                : addAppMouseArea.containsMouse ?
+                  "/resources/images/home_page/add_button_hover.png"
+                :
+                  "/resources/images/home_page/add_button_normal.png"
+      }
     }
   }
+
+
 }

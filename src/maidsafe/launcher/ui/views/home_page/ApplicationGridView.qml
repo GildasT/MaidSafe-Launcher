@@ -18,9 +18,14 @@
 
 import QtQuick 2.4
 import QtQuick.Controls 1.3
+import QtQml.Models 2.1
 
 FocusScope {
   id: gridView
+
+  property alias model: gridRepeater.model
+
+  property Component firstItemComponent: null
 
   readonly property int dropDownAnimationDuration: 100
   readonly property int moveAnimationDuration: 200
@@ -47,7 +52,7 @@ FocusScope {
     onTextChanged: {
       var text = customTitleBarLoader.item.searchField.text
       if (text === "") {
-        gridRepeater.model = homePageController_.homePageModel
+        gridRepeater.model = homePageController_.homePageTreeModel
         gridView.filtering = false
       } else {
         gridRepeater.model = homePageController_.homePageFilterModel
@@ -57,11 +62,16 @@ FocusScope {
     }
   }
 
+  Rectangle {
+    color: "#ddffffff"
+    anchors.fill: parent
+  }
+
   DropArea {
     id: backgroundDropArea
     anchors.fill: parent
     onEntered: {
-      homePageController_.move(drag.source.modelData.index,
+      homePageController_.move(drag.source.dataModel.index,
                                gridRepeater.count - 1)
       // when entering this background area, it needs to be hidden
       // because the drag item cannot enter another DropArea
@@ -69,94 +79,88 @@ FocusScope {
     }
   }
 
-  Grid {
-    id: grid
+  ScrollView {
+    id: scrollView
 
-    anchors {
-      top: parent.top
-      left: parent.left
-      right: parent.right
-      topMargin: 18
-      bottomMargin: 18
-    }
+    anchors.fill: parent
+    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
 
-    columns: Math.max(1, width / minimumColumnWidth)
+    Item {
+      width: gridView.width
+      height: grid.height + grid.anchors.topMargin + grid.anchors.bottomMargin
 
-    move: Transition {
-      id: moveTrans
+      Grid {
+        id: grid
 
-      enabled: false
-      SequentialAnimation {
-        NumberAnimation {
-          property: "x"
-          to: moveTrans.ViewTransition.item.x +
-              (moveTrans.ViewTransition.destination.x - moveTrans.ViewTransition.item.x) / 2 +
-              (moveTrans.ViewTransition.destination.y - moveTrans.ViewTransition.item.y) /
-              gridView.rowHeight * gridView.width
-          duration: moveTrans.ViewTransition.item.dragActive ?
-                      0
-                    :
-                      gridView.moveAnimationDuration / 2
+        anchors {
+          top: parent.top
+          left: parent.left
+          right: parent.right
+          topMargin: 18
+          bottomMargin: 18
         }
-        NumberAnimation {
-          property: "x"
-          to: moveTrans.ViewTransition.item.x +
-              (moveTrans.ViewTransition.destination.x - moveTrans.ViewTransition.item.x) / 2 +
-              (moveTrans.ViewTransition.destination.y - moveTrans.ViewTransition.item.y) / gridView.rowHeight * -gridView.width
-          duration: 0
+
+        columns: Math.max(1, width / minimumColumnWidth)
+
+        move: Transition {
+          id: moveTrans
+
+          enabled: false
+          SequentialAnimation {
+            NumberAnimation {
+              property: "x"
+              to: moveTrans.ViewTransition.item.x +
+                  (moveTrans.ViewTransition.destination.x - moveTrans.ViewTransition.item.x) / 2 +
+                  (moveTrans.ViewTransition.destination.y - moveTrans.ViewTransition.item.y) /
+                  gridView.rowHeight * gridView.width
+              duration: moveTrans.ViewTransition.item.dragActive ?
+                          0
+                        :
+                          gridView.moveAnimationDuration / 2
+            }
+            NumberAnimation {
+              property: "x"
+              to: moveTrans.ViewTransition.item.x +
+                  (moveTrans.ViewTransition.destination.x - moveTrans.ViewTransition.item.x) / 2 +
+                  (moveTrans.ViewTransition.destination.y - moveTrans.ViewTransition.item.y) / gridView.rowHeight * -gridView.width
+              duration: 0
+            }
+            PropertyAction {
+              property: "y"
+            }
+            NumberAnimation {
+              property: "x"
+              duration: moveTrans.ViewTransition.item.dragActive ?
+                          0
+                        :
+                          gridView.moveAnimationDuration / 2
+            }
+          }
         }
-        PropertyAction {
-          property: "y"
+
+        Loader {
+          visible: sourceComponent && !gridView.filtering
+          width: gridView.columnWidth
+          height: gridView.rowHeight
+          opacity: detailsBox.detailedItem ? .5 : 1
+          Behavior on opacity { NumberAnimation { duration: gridView.dropDownAnimationDuration } }
+
+          sourceComponent: gridView.firstItemComponent
         }
-        NumberAnimation {
-          property: "x"
-          duration: moveTrans.ViewTransition.item.dragActive ?
-                      0
-                    :
-                      gridView.moveAnimationDuration / 2
+
+        Repeater {
+          id: gridRepeater
+
+          model: DelegateModel {
+            model: homePageController_.homePageTreeModel
+            delegate: ApplicationGridItem {}
+          }
+
+          onCountChanged: resetNeighbourTimer.restart()
         }
       }
-    }
 
-    MouseArea {
-      id: addAppMouseArea
-
-      visible: !gridView.filtering
-      width: gridView.columnWidth
-      height: gridView.rowHeight
-      opacity: detailsBox.detailedItem ? .5 : 1
-      Behavior on opacity { NumberAnimation { duration: gridView.dropDownAnimationDuration } }
-
-      hoverEnabled: true
-      onClicked: fileDialog.open()
-
-      Image {
-        anchors.centerIn: parent
-        source: addAppMouseArea.pressed ?
-                  "/resources/images/home_page/add_button_pressed.png"
-                : addAppMouseArea.containsMouse ?
-                  "/resources/images/home_page/add_button_hover.png"
-                :
-                  "/resources/images/home_page/add_button_normal.png"
-      }
-    }
-
-    Repeater {
-      id: gridRepeater
-
-      model: homePageController_.homePageModel
-
-      onCountChanged: resetNeighbourTimer.restart()
-
-      delegate: ApplicationGridItem {
-        width: gridView.columnWidth
-        height: gridView.rowHeight + (detailsBox.item === this ? detailsBox.height : 0)
-
-        opacity: ! detailsBox.detailedItem || detailsBox.detailedItem === this ? 1 : .5
-        Behavior on opacity { NumberAnimation { duration: gridView.dropDownAnimationDuration } }
-      }
+      ApplicationGridDetails { id: detailsBox }
     }
   }
-
-  ApplicationGridDetails { id: detailsBox }
 }

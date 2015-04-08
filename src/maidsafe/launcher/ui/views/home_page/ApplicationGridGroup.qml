@@ -19,44 +19,23 @@
 import QtQuick 2.4
 
 FocusScope {
-  id: item
+  id: application
 
-  readonly property int dataIndex: index
-  readonly property QtObject dataModel: model
+  readonly property QtObject modelData: model
   property bool dragActive: mouseArea.drag.active
 
-  width: gridView.columnWidth
-  height: gridView.rowHeight + (detailsBox.item === this ? detailsBox.height : 0)
-  opacity: ! detailsBox.detailedItem || detailsBox.detailedItem === this ? 1 : .5
-  Behavior on opacity { NumberAnimation { duration: gridView.dropDownAnimationDuration } }
   focus: true
 
   signal clicked()
   onClicked: {
-    if (model.hasModelChildren || detailsBox.detailedItem === item)
+    if (detailsBox.detailedItem === application)
       detailsBox.detailedItem = null
     else
-      detailsBox.detailedItem = item
+      detailsBox.detailedItem = application
   }
-  signal doubleClicked()
-  onDoubleClicked: {
-    if (model.hasModelChildren) {
-      childGridView.model.rootIndex = childGridView.model.modelIndex(item.dataIndex)
-      childGridView.transformOrigin = Item.TopLeft
-      childGridView.scale = 0.25
-      childGridView.width = (gridView.iconSize - 2) / childGridView.scale
-      childGridView.height = (gridView.iconSize - 2) / childGridView.scale
-      var point = rootGridView.mapFromItem(decoration, 0, 0);
-      childGridView.x = point.x +1
-      childGridView.y = point.y +1
-//      console.log(point.x + " " + point.y)
-      childGridView.visible = true
-    }
-  }
-
   onDragActiveChanged: {
     detailsBox.item = null
-    item.focus = true
+    application.focus = true
     if (dragActive) {
       endDragAnimation.running = false
       moveTrans.enabled = true
@@ -65,8 +44,8 @@ FocusScope {
     } else {
       moveTrans.enabled = false
       resetNeighbourTimer.restart()
-      mouseArea.parent = item
-      var newPosition = mainWindowItem.mapToItem(item, mouseArea.x, mouseArea.y)
+      mouseArea.parent = application
+      var newPosition = mainWindowItem.mapToItem(application, mouseArea.x, mouseArea.y)
       mouseArea.x = newPosition.x
       mouseArea.y = newPosition.y
       endDragAnimation.running = true
@@ -91,8 +70,8 @@ FocusScope {
   Connections {
     target: resetNeighbourTimer
     onTriggered: {
-      item.leftNeighbour = item.getLeftNeighbour()
-      item.rightNeighbour = item.getRightNeighbour()
+      application.leftNeighbour = application.getLeftNeighbour()
+      application.rightNeighbour = application.getRightNeighbour()
     }
   }
 
@@ -108,7 +87,7 @@ FocusScope {
     height: gridView.rowHeight
     width: gridView.columnWidth
     onEntered: {
-      homePageController_.move(drag.source.dataModel.index, index)
+      homePageController_.move(drag.source.modelData.index, index)
       backgroundDropArea.visible = true
     }
   }
@@ -116,73 +95,37 @@ FocusScope {
   MouseArea {
     id: mouseArea
 
-    opacity: item.dragActive ? .4 : 1
+    opacity: application.dragActive ? .4 : 1
     width: gridView.columnWidth
     height: gridView.rowHeight
 
-    onClicked: item.clicked()
-    onDoubleClicked: item.doubleClicked()
-    Drag.active: item.dragActive
+    onClicked: application.clicked()
+    Drag.active: application.dragActive
     Drag.hotSpot.x: width / 2
     Drag.hotSpot.y: height / 2
-    Drag.source: item
+    Drag.source: application
     drag.target: !gridView.filtering ? mouseArea : null
 
-    Component {
-      id: applicationComponent
+    Rectangle {
+      id: icon
 
-      Image {
-        source: dataModel.icon
-        height: parent.height
-        fillMode: Image.PreserveAspectFit
-      }
-    }
-    Component {
-      id: groupComponent
-
-      Rectangle {
-        anchors.fill: parent
-        color: "#ffffff"
-        border { width: 1; color: "#4d4d4d" }
-        radius: 8
-        Grid {
-          id: groupGrid
-          anchors.fill: parent
-          anchors.margins: 8
-          columns: 2
-          rows: 2
-          spacing: 8
-          Repeater {
-            model: dataModel.groupIcons
-            Image {
-              source: dataModel.groupIcons[index]
-              height: 20
-              fillMode: Image.PreserveAspectFit
-            }
-          }
-        }
-      }
-    }
-    Loader {
-      id: decoration
+      color: "black"
+      width: gridView.iconSize
+      height: gridView.iconSize
       anchors {
         top: parent.top
         horizontalCenter: parent.horizontalCenter
         topMargin: 16
       }
-      height: gridView.iconSize
-      width: gridView.iconSize
-      readonly property QtObject dataModel: model
-      sourceComponent: model.hasModelChildren ? groupComponent : applicationComponent
     }
 
     Text {
       id: text
 
-      text: model.name
+      text: name
       anchors {
         left: parent.left
-        top: decoration.bottom
+        top: icon.bottom
         right: parent.right
         bottom: parent.bottom
         topMargin: 12
@@ -192,7 +135,7 @@ FocusScope {
       horizontalAlignment: Text.AlignHCenter
       elide: Text.ElideMiddle
       font.pixelSize: 12
-      font.underline: item.activeFocus
+      font.underline: application.activeFocus
       color: gridView.iconTextColor
     }
   }

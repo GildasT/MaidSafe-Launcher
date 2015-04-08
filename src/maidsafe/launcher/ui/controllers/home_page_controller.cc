@@ -20,6 +20,7 @@
 
 #include "maidsafe/launcher/ui/controllers/home_page_controller.h"
 #include "maidsafe/launcher/ui/models/app_collection.h"
+#include "maidsafe/launcher/ui/models/group_app_collection.h"
 
 namespace maidsafe {
 
@@ -31,7 +32,8 @@ HomePageController::HomePageController(MainWindow& main_window, QObject* parent)
     : QObject{parent},
       main_window_{main_window},
       app_collection_{new AppCollection{this}},
-      app_collection_filter_{new QSortFilterProxyModel{this}} {
+      app_collection_filter_{new QSortFilterProxyModel{this}},
+      app_tree_collection_{new GroupAppCollection{this}} {
   app_collection_filter_->setSourceModel(app_collection_);
   app_collection_filter_->setFilterCaseSensitivity(Qt::CaseInsensitive);
   app_collection_filter_->setFilterRole(AppCollection::NameRole);
@@ -47,6 +49,10 @@ QObject* HomePageController::homePageFilterModel() const {
   return app_collection_filter_;
 }
 
+QObject* HomePageController::homePageTreeModel() const {
+  return app_tree_collection_;
+}
+
 HomePageController::HomePageViews HomePageController::currentView() const {
   return current_view_;
 }
@@ -58,12 +64,12 @@ void HomePageController::SetCurrentView(const HomePageViews new_current_view) {
   }
 }
 
-void HomePageController::move(int index_from, int index_to) {
-  app_collection_->MoveData(index_from, index_to);
+void HomePageController::move(int /*index_from*/, int /*index_to*/) {
+//  app_collection_->MoveData(index_from, index_to);
 }
 
-void HomePageController::addAppRequested(const QUrl& file_url) {
-  app_collection_->AddData(file_url.path(), QColor{130, 80, 255});
+void HomePageController::addAppRequested(const QUrl& /*file_url*/) {
+//  app_collection_->AddData(file_url.path(), QColor{130, 80, 255});
 }
 
 void HomePageController::Invoke() {
